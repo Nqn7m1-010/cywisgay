@@ -306,6 +306,7 @@
 <div class="toast" id="toast"></div>
 
 <div class="nav-bar" id="navBar" style="display:none">
+  <button class="nav-btn ghost" id="navHomeBtn" onclick="exitToHome()" style="flex:0 0 auto;padding:9px 10px;font-size:16px">🏠</button>
   <button class="nav-btn ghost" id="prevQ" onclick="prevQ()">◀</button>
   <button class="nav-btn ghost" id="sheetBtn" onclick="toggleSheet()">📋</button>
   <button class="nav-btn primary" id="actionBtn" onclick="actionBtn()">查看答案</button>
@@ -541,6 +542,11 @@ function showPage(id) {
 }
 
 function goback() {
+  // 模拟考试或随机练习模式点击返回 → 回到首页
+  if (state.examQuestions || state.randomMode) {
+    exitToHome();
+    return;
+  }
   if (pageStack.length > 1) pageStack.pop();
   const prev = pageStack[pageStack.length-1];
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -649,6 +655,8 @@ function setMode(m) {
 
 // ===================== QUIZ =====================
 function startQ(ci, qi) {
+  state.randomMode = false;
+  state.examQuestions = null;
   state.currentChapter = ci;
   state.currentQuestionIndex = qi;
   state.showingAnswer = false;
@@ -837,6 +845,22 @@ function actionBtn() {
 }
 
 function nextQ() {
+  // 模拟考试模式
+  if (state.examQuestions) {
+    if (state.examIndex < state.examQuestions.length - 1) {
+      state.examIndex++;
+      renderExamQ();
+    } else {
+      renderExamResult();
+    }
+    return;
+  }
+  // 随机练习模式
+  if (state.randomMode) {
+    goRandom();
+    return;
+  }
+  // 普通刷题模式
   const ch = DATA[state.currentChapter];
   if (state.currentQuestionIndex < ch.questions.length - 1) {
     state.currentQuestionIndex++;
@@ -846,6 +870,20 @@ function nextQ() {
   }
 }
 function prevQ() {
+  // 模拟考试模式
+  if (state.examQuestions) {
+    if (state.examIndex > 0) {
+      state.examIndex--;
+      renderExamQ();
+    }
+    return;
+  }
+  // 随机练习模式
+  if (state.randomMode) {
+    goRandom();
+    return;
+  }
+  // 普通刷题模式
   if (state.currentQuestionIndex > 0) {
     state.currentQuestionIndex--;
     state.showingAnswer = false;
@@ -855,6 +893,16 @@ function prevQ() {
 }
 
 function updateQuizHeader() {
+  if (state.examQuestions) {
+    document.getElementById('pageTitle').textContent = '📝 模拟考试';
+    document.getElementById('progressTxt').textContent = `${state.examIndex+1}/${state.examQuestions.length}`;
+    return;
+  }
+  if (state.randomMode) {
+    document.getElementById('pageTitle').textContent = '🎲 随机练习';
+    document.getElementById('progressTxt').textContent = '∞';
+    return;
+  }
   const ch = DATA[state.currentChapter];
   const total = ch.questions.length;
   const cur = state.currentQuestionIndex + 1;
@@ -863,6 +911,22 @@ function updateQuizHeader() {
 }
 
 function updateNavBtn() {
+  // 随机练习模式
+  if (state.randomMode) {
+    document.getElementById('prevQ').disabled = false;
+    document.getElementById('nextQ').disabled = false;
+    document.getElementById('actionBtn').textContent = '🎲 下一题';
+    return;
+  }
+  // 模拟考试模式
+  if (state.examQuestions) {
+    const total = state.examQuestions.length;
+    document.getElementById('prevQ').disabled = state.examIndex === 0;
+    document.getElementById('nextQ').disabled = false;
+    document.getElementById('actionBtn').textContent = state.examIndex < total-1 ? '下一题' : '📊 交卷';
+    return;
+  }
+  // 普通刷题模式
   const ch = DATA[state.currentChapter];
   const q = ch.questions[state.currentQuestionIndex];
   document.getElementById('prevQ').disabled = state.currentQuestionIndex === 0;
@@ -877,11 +941,21 @@ function updateNavBtn() {
 
 // ===================== RANDOM =====================
 function goRandom() {
-  // Pick a random unanswered or random question
+  state.randomMode = true;
+  state.examQuestions = null;
+  state.showingAnswer = false;
+  state.userAnswers = {};
   const all = [];
   DATA.forEach((ch,ci)=>ch.questions.forEach((q,qi)=>{ all.push({ci,qi}); }));
   const picked = all[Math.floor(Math.random() * all.length)];
-  if (picked) startQ(picked.ci, picked.qi);
+  if (picked) {
+    state.currentChapter = picked.ci;
+    state.currentQuestionIndex = picked.qi;
+    document.getElementById('sheetCard').style.display = 'none';
+    showPage('pageQuiz');
+    document.getElementById('navBar').style.display = 'flex';
+    renderQ();
+  }
 }
 
 // ===================== WRONG BOOK =====================
@@ -1001,6 +1075,8 @@ function resetAll() {
 
 // ===================== EXAM =====================
 function goExam() {
+  state.randomMode = false;
+  state.examQuestions = null;
   // Pick 20 random single-choice + 5 multi-choice for exam simulation
   const allSingle = [];
   const allMulti = [];
@@ -1075,8 +1151,19 @@ function examSelS(l) {
   const eq = state.examQuestions;
   const {ci, qi} = eq[state.examIndex];
   const q = DATA[ci].questions[qi];
-  state.examAnswers[`exam-${ci}-${q.id}`] = [l];
+  const key = `exam-${ci}-${q.id}`;
+  // 已经答过不再重复处理
+  if (state.examAnswers[key] && state.examAnswers[key].length) return;
+  state.examAnswers[key] = [l];
+  // 自动判题
   renderExamQ();
+  const corr = l === q.a;
+  const container = document.getElementById('quizContent');
+  const div = document.createElement('div');
+  div.className = 'ans-box';
+  div.style.marginTop = '0';
+  div.innerHTML = `<div class="title">${corr?'✅ 正确！':'❌ 错误！正确答案：'+q.a}</div>`;
+  container.querySelector('.quiz-card').appendChild(div);
 }
 function examTogM(l) {
   const eq = state.examQuestions;
@@ -1131,10 +1218,21 @@ function renderExamResult() {
 }
 
 function goHome() { showPage('pageHome'); renderHome(); document.getElementById('navBar').style.display='none'; }
+function exitToHome() {
+  state.examQuestions = null;
+  state.randomMode = false;
+  goHome();
+}
 
-// Override actionBtn for exam mode
+// Override actionBtn for exam and random mode
 const origAction = actionBtn;
 actionBtn = function() {
+  // 随机练习 → 下一题
+  if (state.randomMode) {
+    goRandom();
+    return;
+  }
+  // 模拟考试 → 下一题/交卷
   if (state.examQuestions) {
     const eq = state.examQuestions;
     if (state.examIndex < eq.length - 1) {
