@@ -626,14 +626,16 @@ function filterQuestions() {
         const r = getRec(state.currentChapter, x.id);
         const dot = r.a ? (r.c?'ok':'no') : 'none';
         const isLong = x.type === '论述' || x.type === '材料';
+        const firstLine = x.q.split('\n')[0];
+        const hasMore = x.q.includes('\n');
         return `<div class="q-item" style="${isLong?'flex-direction:column;align-items:stretch;gap:4px':''}" onclick="startQ(${state.currentChapter},${gi})">
-          <div style="display:flex;align-items:center;gap:8px;${isLong?'width:100%':''}">
-            <span class="dot ${dot}"></span>
-            <span class="tag" style="color:${colors[x.type]||'#888'}">${x.type}</span>
-            <span style="flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.q.replace(/\n.*/,'').slice(0,50)}${x.q.replace(/\n.*/,'').length>50?'...':''}</span>
+          <div style="display:flex;align-items:flex-start;gap:8px;${isLong?'width:100%':''}">
+            <span class="dot ${dot}" style="margin-top:3px"></span>
+            <span class="tag" style="color:${colors[x.type]||'#888'};flex-shrink:0">${x.type}</span>
+            <span style="flex:1;font-size:14px;line-height:1.6">${firstLine}${hasMore?'…':''}</span>
             ${r.a ? (r.c?'✅':'❌') : ''}
           </div>
-          ${isLong?`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-left:26px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${x.q.replace(/\n/g,'<br>')}</div>`:''}
+          ${isLong&&hasMore?`<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-left:26px">${x.q.split('\n').slice(1).join('<br>')}</div>`:''}
         </div>`;
       }).join('')
     : '<div class="empty"><div class="icon">🔍</div><p>未找到匹配题目</p></div>';
@@ -904,14 +906,16 @@ function renderWrong() {
     if (!q) return null;
     const colors = {'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
     const isLong = q.type === '论述' || q.type === '材料';
+    const firstLine = q.q.split('\n')[0];
+    const hasMore = q.q.includes('\n');
     return `<div class="q-item" style="${isLong?'flex-direction:column;align-items:stretch;gap:4px':''}" onclick="startQ(${ci},${ch.questions.indexOf(q)})">
-      <div style="display:flex;align-items:center;gap:8px;${isLong?'width:100%':''}">
-        <span class="dot no"></span>
-        <span class="tag" style="color:${colors[q.type]||'#888'}">${q.type}</span>
-        <span style="flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.q.replace(/\n.*/,'').slice(0,50)}${q.q.replace(/\n.*/,'').length>50?'...':''}</span>
+      <div style="display:flex;align-items:flex-start;gap:8px;${isLong?'width:100%':''}">
+        <span class="dot no" style="margin-top:3px"></span>
+        <span class="tag" style="color:${colors[q.type]||'#888'};flex-shrink:0">${q.type}</span>
+        <span style="flex:1;font-size:14px;line-height:1.6">${firstLine}${hasMore?'…':''}</span>
         <span style="font-size:12px;color:var(--text2);flex-shrink:0">${ch.short}</span>
       </div>
-      ${isLong?`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-left:26px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${q.q.replace(/\n/g,'<br>')}</div>`:''}
+      ${isLong&&hasMore?`<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-left:26px">${q.q.split('\n').slice(1).join('<br>')}</div>`:''}
     </div>`;
   }).filter(Boolean).join('');
   container.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
