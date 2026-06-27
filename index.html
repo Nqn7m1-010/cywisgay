@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>马原题库 - 期末复习</title>
+<style>
+  :root {
+    --primary: #4F46E5; --primary-light: #818CF8; --primary-dark: #3730A3;
+    --success: #22C55E; --danger: #EF4444; --warning: #F59E0B;
+    --bg: #F1F5F9; --card: #FFFFFF; --text: #0F172A;
+    --text2: #64748B; --border: #E2E8F0; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --radius: 12px; --nav-h: 64px;
+  }
+  .dark { --bg: #0F172A; --card: #1E293B; --text: #F1F5F9; --text2: #94A3B8; --border: #334155; --shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+    padding-bottom:calc(var(--nav-h) + 16px); transition:background .3s,color .3s;
+  }
+  /* Header */
+  .header {
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:#fff; padding:14px 16px; position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .header .back { background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 8px 0 0;display:none; }
+  .header .title { font-size:17px;font-weight:600; }
+  .header .actions { display:flex;gap:8px;align-items:center; }
+  .header .actions button {
+    background:rgba(255,255,255,0.15); border:none; color:#fff;
+    width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .header .progress-txt { font-size:13px;opacity:.85; }
+  /* Pages */
+  .page { display:none; padding:16px; max-width:800px; margin:0 auto; }
+  .page.active { display:block; }
+  /* Home */
+  .home-hd { text-align:center; padding:24px 0 16px; }
+  .home-hd h1 { font-size:26px; background:linear-gradient(135deg,var(--primary),var(--primary-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .home-hd p { color:var(--text2); font-size:14px; margin-top:4px; }
+  .quick-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+  .quick-btn {
+    background:var(--card); border-radius:var(--radius); padding:16px 14px;
+    box-shadow:var(--shadow); cursor:pointer; text-align:center; transition:transform .15s;
+    border:1.5px solid var(--border); position:relative; overflow:hidden;
+  }
+  .quick-btn:active { transform:scale(.97); }
+  .quick-btn .icon { font-size:28px; }
+  .quick-btn .label { font-size:13px;font-weight:600;margin-top:6px; }
+  .quick-btn .sub { font-size:11px;color:var(--text2);margin-top:2px; }
+  .quick-btn .badge-num {
+    position:absolute; top:6px;right:8px; background:var(--danger); color:#fff;
+    font-size:11px; padding:1px 7px; border-radius:10px; font-weight:600; display:none;
+  }
+  .stat-cards { display:flex;gap:10px;margin:16px 0; }
+  .stat-c { flex:1; background:var(--card); border-radius:var(--radius); padding:14px 12px;
+    text-align:center; box-shadow:var(--shadow); }
+  .stat-c .n { font-size:24px;font-weight:700;color:var(--primary); }
+  .stat-c .l { font-size:12px;color:var(--text2);margin-top:2px; }
+  .section-title { font-size:15px;font-weight:600;margin:16px 0 10px;display:flex;justify-content:space-between; }
+  /* Chapter list */
+  .ch-list { display:flex;flex-direction:column;gap:10px; }
+  .ch-card {
+    background:var(--card); border-radius:var(--radius); padding:16px 18px;
+    box-shadow:var(--shadow); cursor:pointer; display:flex;justify-content:space-between;align-items:center;
+  }
+  .ch-card:active { transform:scale(.98); }
+  .ch-card .info h3 { font-size:15px;font-weight:600; }
+  .ch-card .info p { font-size:12px;color:var(--text2);margin-top:3px; }
+  .ch-card .right { text-align:right; }
+  .ch-card .right .pct { font-size:14px;font-weight:600;color:var(--primary); }
+  .ch-card .right .bar { width:60px;height:4px;background:#E2E8F0;border-radius:2px;margin-top:4px;overflow:hidden; }
+  .ch-card .right .bar-in { height:100%;border-radius:2px;background:var(--primary);transition:width .5s; }
+  /* Type filter */
+  .type-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:12px 0; }
+  .type-btn {
+    background:var(--card); border-radius:8px; padding:12px 6px; text-align:center;
+    box-shadow:var(--shadow); cursor:pointer; border:2px solid transparent; font-size:12px;
+  }
+  .type-btn:active { transform:scale(.96); }
+  .type-btn .icon { font-size:20px; }
+  .type-btn.active { border-color:var(--primary); background:#EEF2FF; }
+  .type-btn.dark.active { background:rgba(79,70,229,.15); }
+  /* Q list */
+  .q-item {
+    background:var(--card); border-radius:var(--radius); padding:13px 16px;
+    box-shadow:var(--shadow); cursor:pointer; display:flex;align-items:center;gap:10px;margin-bottom:8px;
+  }
+  .q-item:active { transform:scale(.98); }
+  .q-item .dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+  .q-item .dot.ok { background:var(--success); }
+  .q-item .dot.no { background:var(--danger); }
+  .q-item .dot.none { background:var(--border); }
+  .q-item .tag {
+    font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;
+    white-space:nowrap;flex-shrink:0;
+  }
+  /* Quiz */
+  .quiz-card {
+    background:var(--card); border-radius:var(--radius); padding:20px;
+    box-shadow:var(--shadow); margin-bottom:12px;
+    animation: fadeIn .25s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .q-hd { display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:13px;color:var(--text2); }
+  .q-badge {
+    padding:3px 12px; border-radius:20px; font-size:12px; font-weight:600;
+  }
+  .q-body { font-size:16px;line-height:1.8;margin-bottom:16px; }
+  .q-body .num {
+    display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;
+    background:var(--primary);color:#fff;border-radius:50%;font-size:13px;font-weight:600;
+    margin-right:8px;vertical-align:middle;flex-shrink:0;
+  }
+  .opts { display:flex;flex-direction:column;gap:8px; }
+  .opt {
+    display:flex;align-items:flex-start;gap:10px; padding:11px 14px;
+    border-radius:8px; border:1.5px solid var(--border); cursor:pointer;
+    font-size:15px;line-height:1.5; transition:all .15s;
+  }
+  .opt:active { transform:scale(.98); }
+  .opt .l {
+    width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;flex-shrink:0;background:#F1F5F9;color:var(--text2);
+  }
+  .opt.sel { border-color:var(--primary);background:#EEF2FF; }
+  .opt.sel .l { background:var(--primary);color:#fff; }
+  .opt.cor { border-color:var(--success);background:#F0FDF4; }
+  .opt.cor .l { background:var(--success);color:#fff; }
+  .opt.wro { border-color:var(--danger);background:#FEF2F2; }
+  .opt.wro .l { background:var(--danger);color:#fff; }
+  .opt.dis { pointer-events:none; }
+  .multi-hint { font-size:13px;color:var(--warning);margin-bottom:10px;font-weight:500;display:flex;align-items:center;gap:6px; }
+  .ans-box {
+    margin-top:14px;padding:14px;background:#F0FDF4;border-radius:8px;
+    border-left:4px solid var(--success);font-size:14px;line-height:1.7;
+    animation: fadeIn .2s ease;
+  }
+  .ans-box .title { font-weight:600;color:var(--success);margin-bottom:4px; }
+  /* Essay */
+  .essay-card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:12px; }
+  .essay-card .pre-line { white-space:pre-line; }
+  .essay-toggle {
+    background:#F1F5F9; border:1px dashed var(--border); border-radius:8px;
+    padding:12px; text-align:center; cursor:pointer; margin-top:14px;
+    color:var(--text2); font-size:14px; transition:background .2s;
+  }
+  .essay-toggle:active { background:#E2E8F0; }
+  .essay-ans { display:none; background:#FFFBEB; border-radius:8px; padding:16px; margin-top:12px; font-size:14px;line-height:1.8;border-left:4px solid var(--warning); }
+  .essay-ans.show { display:block; }
+  /* Answer sheet */
+  .sheet-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;margin:12px 0; }
+  .sheet-cell {
+    aspect-ratio:1; border-radius:6px; display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);
+    background:var(--card); transition:all .15s;
+  }
+  .sheet-cell:active { transform:scale(.93); }
+  .sheet-cell.cur { border-color:var(--primary);box-shadow:0 0 0 2px rgba(79,70,229,.25); }
+  .sheet-cell.ok { background:var(--success);color:#fff;border-color:var(--success); }
+  .sheet-cell.no { background:var(--danger);color:#fff;border-color:var(--danger); }
+  .sheet-cell.pending { background:#F1F5F9; }
+  /* Bottom nav */
+  .nav-bar {
+    position:fixed; bottom:0; left:0; right:0; background:var(--card);
+    border-top:1px solid var(--border); padding:8px 16px;
+    display:flex; gap:8px; max-width:800px; margin:0 auto; z-index:100;
+    height:var(--nav-h); align-items:center;
+  }
+  .nav-btn {
+    padding:9px 16px; border-radius:8px; border:none; font-size:13px;font-weight:600;
+    cursor:pointer; transition:all .15s; white-space:nowrap;
+  }
+  .nav-btn:active { transform:scale(.96); }
+  .nav-btn.primary { background:var(--primary);color:#fff;flex:1; }
+  .nav-btn.primary:disabled { opacity:.4;cursor:default; }
+  .nav-btn.ghost { background:#F1F5F9;color:var(--text);flex:1; }
+  .nav-btn.ghost:disabled { opacity:.4;cursor:default; }
+  .nav-btn.danger { background:#FEF2F2;color:var(--danger); }
+  .nav-btn.icon-only { width:40px;padding:9px 0;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:18px; }
+  /* Stats */
+  .stat-section { margin-bottom:20px; }
+  .stat-section h3 { font-size:14px;font-weight:600;margin-bottom:10px; }
+  .stat-bar-row { display:flex;align-items:center;gap:10px;margin-bottom:8px; }
+  .stat-bar-row .lb { font-size:13px;width:80px;flex-shrink:0; }
+  .stat-bar-row .bar { flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden; }
+  .stat-bar-row .bar-fill { height:100%;border-radius:4px;transition:width .6s; }
+  .stat-bar-row .val { font-size:13px;font-weight:600;width:40px;text-align:right; }
+  /* Review */
+  .review-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+  .review-stat {
+    background:var(--card); border-radius:var(--radius); padding:14px;text-align:center;box-shadow:var(--shadow);
+  }
+  .review-stat .n { font-size:22px;font-weight:700; }
+  .review-stat .l { font-size:12px;color:var(--text2);margin-top:2px; }
+  /* Search */
+  .search-wrap {
+    display:flex; gap:8px; margin-bottom:12px;
+  }
+  .search-wrap input {
+    flex:1; padding:10px 14px; border-radius:8px; border:1.5px solid var(--border);
+    font-size:14px; outline:none; background:var(--card); color:var(--text);
+    transition:border-color .2s;
+  }
+  .search-wrap input:focus { border-color:var(--primary); }
+  /* Toast */
+  .toast {
+    position:fixed; top:60px; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,.8); color:#fff; padding:10px 24px;
+    border-radius:20px; font-size:14px; z-index:999;
+    opacity:0; transition:opacity .3s; pointer-events:none;
+  }
+  .toast.show { opacity:1; }
+  /* Empty */
+  .empty { text-align:center;padding:40px 0;color:var(--text2); }
+  .empty .icon { font-size:48px;margin-bottom:12px; }
+  /* Mode switch */
+  .mode-switch { display:flex;background:var(--border);border-radius:8px;padding:3px;margin-bottom:12px; }
+  .mode-switch div {
+    flex:1; text-align:center; padding:7px; border-radius:6px; font-size:13px;
+    font-weight:500; cursor:pointer; transition:all .2s; color:var(--text2);
+  }
+  .mode-switch div.active { background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  @media (max-width:420px) {
+    .type-grid { grid-template-columns:repeat(3,1fr); }
+    .quick-grid { grid-template-columns:1fr 1fr; }
+    .review-grid { grid-template-columns:1fr 1fr; }
+    .q-body { font-size:15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header" id="header">
+  <div>
+    <button class="back" id="backBtn" onclick="goback()">‹</button>
+    <span class="title" id="pageTitle">马原题库</span>
+  </div>
+  <div class="actions">
+    <span class="progress-txt" id="progressTxt"></span>
+    <button onclick="toggleDark()" id="darkBtn" title="切换主题">🌙</button>
+  </div>
+</div>
+
+<div class="page active" id="pageHome">
+  <div class="home-hd">
+    <h1>📚 马原题库</h1>
+    <p>马克思主义基本原理 · 含历年真题</p>
+  </div>
+  <div class="stat-cards">
+    <div class="stat-c"><div class="n" id="hTotal">0</div><div class="l">总题数</div></div>
+    <div class="stat-c"><div class="n" id="hDone">0</div><div class="l">已练习</div></div>
+    <div class="stat-c"><div class="n" id="hRate">0%</div><div class="l">正确率</div></div>
+  </div>
+  <div class="quick-grid">
+    <div class="quick-btn" onclick="goRandom()">
+      <div class="icon">🎲</div><div class="label">随机练习</div><div class="sub">随机抽题</div>
+    </div>
+    <div class="quick-btn" onclick="goWrongBook()">
+      <div class="icon">📕</div><div class="label">错题本</div><div class="sub" id="wrongSub">共 0 题</div>
+      <span class="badge-num" id="wrongBadge">0</span>
+    </div>
+    <div class="quick-btn" onclick="goStats()">
+      <div class="icon">📊</div><div class="label">学习统计</div><div class="sub">查看分析</div>
+    </div>
+    <div class="quick-btn" onclick="goExam()">
+      <div class="icon">📝</div><div class="label">模拟考试</div><div class="sub">限时挑战</div>
+    </div>
+  </div>
+  <div class="section-title"><span>📖 章节练习</span></div>
+  <div class="ch-list" id="chapterList"></div>
+</div>
+
+<div class="page" id="pageChapter">
+  <div class="mode-switch" id="modeSwitch">
+    <div class="active" data-mode="practice" onclick="setMode('practice')">📖 刷题模式</div>
+    <div data-mode="exam" onclick="setMode('exam')">📝 考试模式</div>
+  </div>
+  <div class="search-wrap">
+    <input id="searchInput" placeholder="🔍 搜索题目关键词..." oninput="filterQuestions()">
+  </div>
+  <div class="type-grid" id="typeGrid"></div>
+  <div id="questionList"></div>
+</div>
+
+<div class="page" id="pageQuiz">
+  <div id="quizContent"></div>
+  <!-- Answer Sheet -->
+  <div class="quiz-card" id="sheetCard" style="display:none">
+    <div style="font-size:14px;font-weight:600;margin-bottom:8px;">📋 答题卡</div>
+    <div class="sheet-grid" id="sheetGrid"></div>
+  </div>
+</div>
+
+<div class="page" id="pageStats">
+  <div id="statsContent"></div>
+</div>
+
+<div class="page" id="pageWrong">
+  <div id="wrongContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="nav-bar" id="navBar" style="display:none">
+  <button class="nav-btn ghost" id="prevQ" onclick="prevQ()">◀</button>
+  <button class="nav-btn ghost" id="sheetBtn" onclick="toggleSheet()">📋</button>
+  <button class="nav-btn primary" id="actionBtn" onclick="actionBtn()">查看答案</button>
+  <button class="nav-btn ghost" id="nextQ" onclick="nextQ()">▶</button>
+</div>
+
+<script>
+// ===================== DATA =====================
+const DATA = [
+  { id:1, title:'第一章 辩证法与唯物论', short:'第一章', color:'#4F46E5',
+    questions:[
+      {id:1,type:'单选',q:'辩证法的否定即"扬弃"，它的含义是指（　）。',o:['抛弃','事物中好的方面和坏的方面的组合','纯粹的否定','既克服又保留'],a:'D'},
+      {id:2,type:'单选',q:'《百喻经》愚人加盐的寓言给我们的启示是（　）。',o:['在事物的发展过程中要时时注意事物的自我否定','在认识和处理问题时要掌握适度的原则','不可能通过一些现象而去认识某个事物的本质','持续的量变会引起事物发生质的变化'],a:'B'},
+      {id:3,type:'单选',q:'唯物辩证法的否定之否定规律揭示了事物发展的（　）。',o:['方向和道路','形式和状态','结构和功能','源泉和动力'],a:'A'},
+      {id:4,type:'单选',q:'人工智能的出现对马克思主义哲学意识论的意义是（　）。',o:['否定了物质对意识的决定作用','改变了人类意识活动的规律性','肯定了人工智能可以代替意识的能动活动','丰富了物质和意识相互关系内容'],a:'D'},
+      {id:5,type:'单选',q:'90%×90%×90%×90%×90%=59%，蕴含的辩证法道理是（　）。',o:['肯定中包含否定','量变引起质变','前进性和曲折性的统一','矛盾双方既对立又统一'],a:'B'},
+      {id:6,type:'单选',q:'"钉子缺，蹄铁卸，战马撅……国家灭"包含的哲学原理是（　）。',o:['事物是普遍联系的','事物是变化的','事物的现象是本质的表现','事物的量变引起质变'],a:'A'},
+      {id:7,type:'单选',q:'华罗庚"一支粉笔多长为好"的优选问题，从辩证法看就是要（　）。',o:['注重量的积累','保持事物质的稳定性','坚持适度原则','全面考虑事物属性的多样性'],a:'C'},
+      {id:8,type:'单选',q:'毛泽东提出"矛盾问题的精髓"是指（　）。',o:['矛盾的共性和个性，绝对和相对','矛盾的同一性和斗争性','矛盾的主要方面和次要方面','主要矛盾和次要矛盾'],a:'A'},
+      {id:9,type:'单选',q:'"改革会使人人受益"但"伴随着眼泪和痛苦"，体现的哲学道理是（　）。',o:['量变是质变的前提和必要准备','事物的发展是前进性和曲折性的统一','矛盾的次要方面规定事物的性质','矛盾的双方在一定条件下相互转化'],a:'B'},
+      {id:10,type:'单选',q:'从哲学上讲，"暗物质"（　）。',o:['是物质的一种具体形态','是隐藏着的物质的派生物','概括了客观存在着的一切事物的共性','是一种观念的存在，并非现实的存在'],a:'A'},
+      {id:11,type:'单选',q:'用电击大脑关闭意识的研究佐证了（　）。①意识活动通过人脑反射实现 ②意识内容是主观的 ③意识是人脑的产物 ④没有不可认识之物',o:['①③','①④','②③','②④'],a:'B'},
+      {id:12,type:'单选',q:'日本排放核污水，国际社会制止是基于（　）。①联系多样性可建具体联系 ②联系客观性要在固有联系中把握 ③部分变化不影响整体 ④联系普遍性',o:['①②','①③','②④','③④'],a:'C'},
+      {id:13,type:'单选',q:'坚持问题导向的哲学依据是（　）。',o:['主要矛盾对事物发展起决定作用','主次矛盾要同等对待','矛盾特殊性寓于普遍性之中','要以矛盾普遍性为依据'],a:'A'},
+      {id:14,type:'单选',q:'关于新质生产力，以下不正确的是（　）。',o:['社会生活本质上是实践的','生产力发展是量变质变的统一','新质生产力彻底颠覆了传统生产力','新质生产力是对传统生产力的辩证否定'],a:'C'},
+      {id:15,type:'单选',q:'"橘生淮南则为橘，生于淮北则为枳"说明了（　）。',o:['事物是普遍联系之网上的一个网结','事物的变化和发展是一个过程','事物的发展变化以时间地点条件为转移','普遍联系是通过中介实现的'],a:'C'},
+      {id:16,type:'单选',q:'列宁关于物质的定义说明物质的唯一特性是（　）。',o:['意识是本原的，物质是派生的','物质是所有具体物质形态之和','物质和意识不可分割','客观实在性'],a:'D'},
+      {id:17,type:'单选',q:'"和实生物，同则不继"包含的辩证法思想有（　）。①矛盾同一是包含差别的同一 ②矛盾是事物发展动力 ③无差别事物才能发展 ④矛盾一方要克服另一方',o:['①②','①④','②③','③④'],a:'A'},
+      {id:18,type:'单选',q:'国企改革股份制改革后效益提升，主要是（　）。',o:['数量增加引起质变','质变引起量变','成分空间排列不同引起质变','发挥主观能动性创造规律'],a:'C'},
+      {id:19,type:'单选',q:'"守得住经典，当得了网红"蕴含的哲理是（　）。①扬弃是抛弃 ②辩证否定是事物自身否定 ③辩证否定是联系环节 ④发展经过否定-肯定-否定之否定',o:['①②','②③','②④','③④'],a:'B'},
+      {id:20,type:'单选',q:'下列属于唯物主义观点的是（　）。①巧妇难为无米之炊 ②没有调查就没有发言权 ③心外无物 ④天地合万物生 ⑤谋事在人成事在天 ⑥不怕做不到只怕想不到',o:['①②③','①②④','②③④','④⑤⑥'],a:'B'},
+      {id:21,type:'多选',q:'体现量变引起质变的有（　）。',o:['九层之台，起于垒土','千里之堤，溃于蚁穴','不积小流，无以成江海','世上无难事，只怕有心人'],a:'ABC'},
+      {id:22,type:'多选',q:'体现对立统一规律的是（　）。',o:['人面不知何处去，桃花依旧笑春风','塞翁失马，焉知非福','祸兮福所倚，福兮祸所伏','不积跬步无以至千里'],a:'BC'},
+      {id:23,type:'多选',q:'对矛盾特殊性原理的具体运用有（　）。',o:['对症下药，量体裁衣','因实制宜，因地制宜','物极必反，相反相成','欲擒故纵，声东击西'],a:'AB'},
+      {id:24,type:'多选',q:'乔羽用"一条大河"激荡爱国深情，体现的哲理有（　）。',o:['物质是本原，意识是派生物','物质和意识不可分割','意识是对客观存在加工的结果','意识是记忆的直观反映'],a:'AC'},
+      {id:25,type:'多选',q:'气象服务体系的建立健全说明（　）。',o:['规律能被创造','意识具有能动创造性','任何事物间都有联系','价值观具有导向作用'],a:'BD'},
+      {id:26,type:'多选',q:'中国航天事业的成就蕴含的哲理有（　）。',o:['前进性和曲折性的统一','新出现的事物前途远大','量的积累必然引起质变','新旧事物融合是发展实质'],a:'AC'},
+      {id:27,type:'多选',q:'新生事物必然取代旧事物，是因为（　）。',o:['新生事物是新出现的事物','有新的结构和功能适应环境','对旧事物扬弃并添加新内容','符合人民群众利益和要求'],a:'BCD'},
+      {id:28,type:'多选',q:'"奢靡之始，危亡之渐"包含的哲理有（　）。',o:['现象是本质的外部表现','特殊性中包含着普遍性','量变是质变的必要准备','质变是量变的必然结果'],a:'CD'},
+      {id:29,type:'多选',q:'属于主观唯心主义的是（　）。',o:['世界是绝对精神的外化','心外无物','感觉世界是理念世界的摹本','存在就是被感知'],a:'BD'},
+      {id:30,type:'多选',q:'属于客观唯心主义的是（　）。',o:['理在事先','道生万物','世界是绝对精神的外化','人为自然界立法'],a:'ABC'},
+      {id:31,type:'论述',q:'结合量子力学等现象，谈谈如何理解马克思主义物质观及其现代意义。',ans:'马克思主义物质观认为物质是客观实在。量子力学新发现没有否定物质客观实在性，而是深化认识。意义：坚持唯物主义一元论；坚持能动反映论和可知论；体现唯物论和辩证法的统一；为自然科学提供方法论指导。'},
+      {id:32,type:'论述',q:'在人工智能飞速发展条件下，如何认识物质与意识的关系？',ans:'物质决定意识。人工智能是意识能动性的产物，是对人类智能的模拟，不能代替人类意识。因为：意识具有社会性和实践性；具有主观能动性和创造性；人工智能的发展反而证明了意识是人脑的机能。'},
+      {id:33,type:'论述',q:'运用矛盾普遍性和特殊性原理，说明中国式现代化的内涵和意义。',ans:'普遍性寓于特殊性之中。中国式现代化既有各国现代化的共同特征，更有基于自己国情的中国特色。是人口规模巨大、共同富裕、物质精神文明协调、人与自然和谐、走和平发展道路的现代化。为发展中国家走向现代化提供中国方案。'},
+      {id:34,type:'材料',q:'[材料1]伽桑狄：物质是原子总和\n[材料2]"气生万物"石柱\n[材料3]朱熹：理是生物之本，气是生物之具\n[材料4]恩格斯：世界真正统一性在于物质性',ans:'（1）材料1近代形而上学唯物主义；材料2古代朴素唯物主义；材料3客观唯心主义。（2）材料4说明世界物质统一性原理。意义：坚持一切从实际出发，实事求是，反对唯心主义和二元论。'},
+    ]
+  },
+  { id:2, title:'第二章 认识论', short:'第二章', color:'#059669',
+    questions:[
+      {id:1,type:'单选',q:'"搬运夫和哲学家的鸿沟是分工掘成的"表明（　）。',o:['与先天素质没有关联','主要来源于后天的实践','取决于主观努力程度','由社会政治地位决定'],a:'B'},
+      {id:2,type:'单选',q:'认识和实践的关系中，认识主体和客体最基本的关系是（　）。',o:['改造与被改造的实践关系','反映与被反映的认识关系','相互依存的关系','相互作用的关系'],a:'A'},
+      {id:3,type:'单选',q:'从认识到实践的第二次飞跃的作用在于（　）。',o:['改造世界和检验理论','认识世界和解释世界','认识实践和指导实践','认识世界和检验理论'],a:'A'},
+      {id:4,type:'单选',q:'坚持真理的客观性是真理观上的（　）。',o:['唯物主义','唯心主义','形而上学','机械论'],a:'A'},
+      {id:5,type:'单选',q:'真理和谬误的相互关系是（　）。',o:['在任何情况下绝对对立','没有转化可能','在一定条件下可以转化','没有原则区别'],a:'C'},
+      {id:6,type:'单选',q:'"此亦一是非，彼亦一是非"的含义是（　）。',o:['强调真理的客观性','否认真理的客观性','强调真理有客观标准','否认真理有客观标准'],a:'D'},
+      {id:7,type:'单选',q:'"从物到感觉和思想"与"从思想和感觉到物"的对立是（　）。',o:['唯物主义与唯心主义认识论对立','经验论与唯理论对立','反映论与先验论对立','可知论与不可知论对立'],a:'A'},
+      {id:8,type:'单选',q:'"当老科学家说可能时总对，说不可能时总错"的意蕴是（　）。',o:['经验不可靠','可能性因人而异','只有可能没有不可能','真理性认识有绝对性和相对性'],a:'D'},
+      {id:9,type:'单选',q:'关于"宁为玉碎"和"留得青山在"的矛盾说法，说明（　）。',o:['真理有多个','真理是具体有条件的','真理内容是主观的','认识受立场观点影响'],a:'D'},
+      {id:10,type:'单选',q:'人与自然关系认识的变迁说明（　）。',o:['实践是客观物质性活动','实践的目的性是形成理性认识','实践具有历史性认识有时代烙印','认识是实践发展的动力'],a:'B'},
+      {id:11,type:'单选',q:'神舟十七号舱外维修作业表明（　）。',o:['实践具有间接现实性','实践是历史发展着的','实践能变观念为现实','实践是认识世界的精神活动'],a:'C'},
+      {id:12,type:'单选',q:'大兴调查研究蕴含的哲理是（　）。',o:['①③','①④','②③','②④'],a:'B'},
+      {id:13,type:'单选',q:'质子半径新发现说明（　）。',o:['真理性认识是特定过程的产物','现有真理包含谬误','真理和谬误相伴相长','真理是抽象不确定的'],a:'A'},
+      {id:14,type:'单选',q:'嫦娥四号探月佐证了（　）。',o:['意识有直接现实性','世界是可知的思维存在有同一性','实践是认识发展的动力','科学实验是检验真理的唯一标准'],a:'D'},
+      {id:15,type:'单选',q:'"再多走一小步真理变错误"说明（　）。',o:['真理和谬误无确定界线','对立只在有限领域有绝对意义','一定条件下可转化','继续前行必然变谬误'],a:'B'},
+      {id:16,type:'单选',q:'钱学森"nothing is final"说明（　）。',o:['认识可一次性完成','认识运动循环往复无穷','真理是主观符合客观','已有真理会被推翻'],a:'B'},
+      {id:17,type:'单选',q:'"认识是主体对客体的直观反映"属于（　）。',o:['辩证唯物主义认识论','客观唯心主义认识论','主观唯心主义认识论','形而上学唯物主义认识论'],a:'D'},
+      {id:18,type:'单选',q:'"按图索骥"的哲学启示是（　）。',o:['继承前人经验','从实际出发不迷信书本','发挥主观能动性','尊重规律'],a:'B'},
+      {id:19,type:'单选',q:'"世上本无对错"观点正确的是（　）。',o:['①③','②④','②③','①④'],a:'D'},
+      {id:20,type:'单选',q:'"按图索骥"的错误在于（　）。',o:['相对主义','教条主义','经验主义','理想主义'],a:'B'},
+      {id:21,type:'多选',q:'迪斯尼路径设计故事蕴含的哲理有（　）。',o:['实践是认识的来源','直接经验总是对的','要尊重群众的实践需求','不要对自然做任何改变'],a:'AC'},
+      {id:22,type:'多选',q:'包含实践决定认识原理的是（　）。',o:['人无远虑必有近忧','没有调查就没有发言权','机遇偏爱有准备的头脑','百闻不如一见，百见不如一干','不登高山不知天之高'],a:'BDE'},
+      {id:23,type:'多选',q:'关于感性认识和理性认识正确的有（　）。',o:['感性认识是错误理性认识正确','二者相互依存渗透','感性认识有待上升为理性认识','感性对本质没有帮助','感性是初级阶段理性是高级阶段'],a:'BCE'},
+      {id:24,type:'多选',q:'实践是真理唯一标准由（　）决定。',o:['实践的特点','实践的功能','真理的属性','真理的本性'],a:'AD'},
+      {id:25,type:'多选',q:'中国天眼FAST成果佐证了（　）。',o:['实践水平提高推动认识发展','科学实验是改造世界的物质活动','实践是有目的有意识的活动','科学实验是唯一途径'],a:'ABC'},
+      {id:26,type:'多选',q:'对感性认识和理性认识表述正确的是（　）。',o:['感性不深刻有待上升','感性对本质无帮助','感性是初级阶段理性是高级阶段','理性包括概念判断推理'],a:'ACD'},
+      {id:27,type:'多选',q:'"实践没有止境，理论创新没有止境"说明（　）。',o:['实践认识的辩证运动循环往复无穷','经过两次飞跃既完成又没完成','正确认识需多次反复','认识过程波浪式前进螺旋式上升'],a:'ABCD'},
+      {id:28,type:'多选',q:'关于真理和谬误正确的是（　）。',o:['真理有用谬误有害','真理在一定条件下转化为谬误','比较而存在斗争而发展','有严格区分不能转化'],a:'BC'},
+      {id:29,type:'多选',q:'关于真理和谬误错误的是（　）。',o:['在任何情况下绝对对立','没有转化可能','一定条件下可转化','没有原则区别'],a:'ABD'},
+      {id:30,type:'多选',q:'"技术需要推动科学"和"绝知此事要躬行"说明（　）。',o:['实践是认识的来源','技术推动了科学的发展','实践是认识发展的动力','科学进步是实践的目的'],a:'AC'},
+      {id:31,type:'论述',q:'结合严建兵团队玉米起源研究，谈谈如何体现"实践对认识的决定作用"。',ans:'（1）实践是认识的来源——分析1000多个样本获新认识；（2）实践是认识发展的动力——科研需求推动深入探索；（3）实践是检验真理的标准——新数据检验修正原假说；（4）实践是认识的目的——正确认识有助于玉米育种。'},
+      {id:32,type:'材料',q:'[材料1]孟子：良能良知\n[材料2]亚里士多德：蜡块说\n[材料3]列宁：认识是反映但不是简单直接完全的反映',ans:'（1）材料1唯心主义先验论；材料2旧唯物主义直观反映论。（2）材料3体现了辩证唯物主义能动反映论：认识是主体对客体的能动反映，是反映与创造的统一。从感性认识到理性认识再到实践，反复无限发展。'},
+    ]
+  },
+  { id:3, title:'第三、四章 历史唯物主义', short:'第三、四章', color:'#D97706',
+    questions:[
+      {id:1,type:'单选',q:'经济基础是由生产力决定的（　）。',o:['生产要素的总和','生产资料的总和','物质要素的总和','生产关系的总和'],a:'D'},
+      {id:2,type:'单选',q:'划分唯物史观和唯心史观的标准是（　）。',o:['阶级和阶级斗争问题','社会和自然的关系问题','社会存在和社会意识的关系问题','个人和社会的关系问题'],a:'C'},
+      {id:3,type:'单选',q:'十大流行语折射社会生活表明（　）。',o:['社会意识具有反作用','社会存在决定社会意识变化','人民群众是历史的创造者','社会意识是对社会存在的反映'],a:'D'},
+      {id:4,type:'单选',q:'"经济上落后的国家在哲学上能演奏第一提琴"说明（　）。',o:['哲学是精神生活部分','上层建筑对经济基础有反作用','社会意识具有相对独立性','生产力是决定力量'],a:'C'},
+      {id:5,type:'单选',q:'人民群众既是"剧中人"又是"剧作者"是（　）。',o:['唯心主义','折中主义','历史唯物主义','历史循环论'],a:'C'},
+      {id:6,type:'单选',q:'从社会意识和社会存在关系看，法律法规（　）。',o:['总是阻碍新技术','只能落后于新技术','与新技术具有不平衡性','是新技术的动力'],a:'C'},
+      {id:7,type:'单选',q:'关于生产力和生产关系不正确的是（　）。',o:['二者统一构成生产方式','生产资料所有制是生产关系基础','生产关系是政治关系','生产工具是生产力水平的标志'],a:'C'},
+      {id:8,type:'单选',q:'唯物史观驱逐唯心主义根本原因是认为（　）。',o:['社会内部矛盾推动发展','社会意识决定社会存在','社会存在决定社会意识','社会发展有规律'],a:'C'},
+      {id:9,type:'单选',q:'"手推磨产生封建社会，蒸汽磨产生工业资本家社会"揭示了（　）。',o:['科技是第一生产力','社会形态更替有顺序','生产力决定生产关系性质','生产工具是生产力尺度'],a:'C'},
+      {id:10,type:'单选',q:'党的路线方针促进经济发展说明（　）。',o:['经济基础由上层建筑决定','上层建筑决定经济基础方向','上层建筑对经济基础有能动作用','不受规律制约'],a:'C'},
+      {id:11,type:'单选',q:'人类社会发展的一般规律是（　）。',o:['生产方式内部矛盾规律','生产力与生产关系、经济基础与上层建筑矛盾运动规律','社会存在与社会意识矛盾规律','物质生产与精神生产矛盾规律'],a:'B'},
+      {id:12,type:'单选',q:'英雄史观的理论出发点是（　）。',o:['人是社会历史主体','意识对社会存在有能动作用','社会意识决定社会存在','社会运动受偶然性支配'],a:'C'},
+      {id:13,type:'单选',q:'"半截子的唯物主义"指（　）。',o:['形而上学唯物主义','在社会历史观上是唯心主义','机械唯物主义','割裂运动与静止'],a:'B'},
+      {id:14,type:'单选',q:'相对剩余价值通过（　）实现。',o:['降低工人工资','延长劳动时间','改进技术提高劳动生产率','延长必要劳动时间'],a:'C'},
+      {id:15,type:'单选',q:'关于剩余价值正确的是（　）。',o:['①②','②④','①③','③④'],a:'C'},
+      {id:16,type:'单选',q:'"社会形态在生产力发挥完前不会灭亡"表明（　）。',o:['生产力与生产关系同步','生产关系推动生产力','生产方式决定社会形态更替','生产力是最终决定力量'],a:'C'},
+      {id:17,type:'单选',q:'关于人民群众作用不正确的是（　）。',o:['物质财富创造者','自然财富创造者','精神财富创造者','社会变革决定力量'],a:'B'},
+      {id:18,type:'单选',q:'下列不属于商品的是（　）。',o:['①②④⑥','①②③⑥','②③④⑤','①②③④'],a:'A'},
+      {id:19,type:'单选',q:'生产者要更多收益需使个别劳动时间（　）。',o:['等于倍加的社会必要劳动时间','等于社会必要劳动时间','小于社会必要劳动时间','大于社会必要劳动时间'],a:'C'},
+      {id:20,type:'单选',q:'关于资本主义和社会主义正确的是（　）。',o:['逐步趋同','资本主义终结人类历史','社会主义快速战胜','将在较长历史阶段共存'],a:'D'},
+      {id:21,type:'多选',q:'"一户一田"整合土地说明（　）。',o:['生产力导致生产关系完全不相适应','上层建筑适应经济基础推动进步','社会存在决定社会意识','适应生产力的生产关系推动生产力'],a:'CD'},
+      {id:22,type:'多选',q:'史铁生《奶奶的星星》启示有（　）。',o:['历史是无数个人合力结果','杰出个人决定历史走向','人人都是历史创造者','每个人对社会都有作用'],a:'AD'},
+      {id:23,type:'多选',q:'"社会存在决定意识"的正确理解有（　）。',o:['社会意识根源于社会存在','社会历史可脱离意识','意识是对物质生活的反映','物质资料生产方式是前提'],a:'ACD'},
+      {id:24,type:'多选',q:'对马克思"吃穿好一些"这段话理解正确的是（　）。',o:['不会改变资本主义剥削关系','高工资以榨取更多剩余价值为前提','资产阶级缓和的措施','资本主义基本矛盾'],a:'ABC'},
+      {id:25,type:'多选',q:'能驳斥"资本主义永续论"的是（　）。',o:['2008年金融危机','社会主义在中国焕发生机','中国式现代化新形态','财富不平等历史新高'],a:'ABCD'},
+      {id:26,type:'多选',q:'"人们是自己观念的生产者"说明（　）。',o:['实践生成全部社会生活','社会意识都是正确反映','物质资料生产方式是社会存在基础','生产关系适应生产力'],a:'AC'},
+      {id:27,type:'多选',q:'商品价值和使用价值关系正确的是（　）。',o:['有价值一定有使用价值','没有价值一定没有使用价值','没有使用价值一定没有价值','有使用价值一定有价值'],a:'AC'},
+      {id:28,type:'多选',q:'劳动力商品价值构成包括（　）。',o:['劳动者创造的新价值','维持本人生存的价值','维持家属的价值','教育训练费用'],a:'BCD'},
+      {id:29,type:'多选',q:'"拿破仑比阿尔卑斯山高"观点一致的有（　）。',o:['英雄舞台舍英雄无历史','历史活动是群众的事业','得民心者得天下','大人物心理动进改观历史'],a:'BC'},
+      {id:30,type:'多选',q:'马克思主义预见社会的方法区别在于（　）。',o:['从客观规律出发','侧重一般特征揭示','批判旧世界发现新世界','乐观主义态度'],a:'ABC'},
+      {id:31,type:'论述',q:'结合社会意识相对独立性原理，谈谈"理论自觉、文化自信"。',ans:'社会意识相对独立性：（1）与社会存在不完全同步；（2）与经济发展不平衡；（3）历史继承性；（4）能动的反作用。理论自觉和文化自信体现先进社会意识的反作用，引领社会发展。因此要重视理论创新和文化建设。'},
+      {id:32,type:'论述',q:'联名球鞋发售价2000元炒至2万元，普通鞋300元。用价值规律分析。',ans:'价值规律：价值量由社会必要劳动时间决定，等价交换。价格围绕价值波动。（1）联名款限量供不应求导致高价；（2）价格偏离价值是暂时现象；（3）品牌效应和消费者心理影响价格，但价值是基础。'},
+      {id:33,type:'材料',q:'[材料1]泰勒斯：水是万物本原\n[材料2]伽森狄：原子总和\n[材料3]恩格斯：世界统一于物质',ans:'（1）材料1古代朴素唯物主义；材料2近代形而上学唯物主义。（2）辩证唯物主义物质观：物质是客观实在。世界统一于物质。意义：坚持一切从实际出发，实事求是。'},
+    ]
+  },
+  { id:4, title:'第四章 期末真题（补充）', short:'期末真题', color:'#DC2626',
+    questions:[
+      {id:1,type:'单选',q:'不属于马克思主义思想来源的是（　）。',o:['亚当·斯密的政治经济学','黑格尔的哲学','萨特的存在主义','圣西门的空想社会主义'],a:'C'},
+      {id:2,type:'单选',q:'属于客观唯心主义的是（　）。',o:['天下无独燃之火','形存则神存','物是感觉的集合','获罪于天，无所祷也'],a:'D'},
+      {id:3,type:'单选',q:'对同一事物不同人有不同反映，说明（　）。',o:['意识是主体的自由创造','意识不受客体影响','意识受主体状况影响','意识内容是主观的'],a:'C'},
+      {id:4,type:'单选',q:'"人努力"与"天帮忙"关系对我们的启示是（　）。',o:['尊重客观规律是发挥主观能动性的前提','思想活动是掌握规律的根本前提','认识活动是主客观统一的基础','外在规律起决定作用'],a:'A'},
+      {id:5,type:'单选',q:'"企业家知道并做到"表明实践具有（　）。',o:['普遍有效性','客观规律性','社会历史性','直接现实性'],a:'D'},
+      {id:6,type:'单选',q:'下列关于社会存在与社会意识关系正确的是（　）。',o:['社会意识总是先于社会存在','社会存在推动社会意识同步发展','社会意识起积极推动作用','社会存在决定社会意识，社会意识反作用'],a:'D'},
+      {id:7,type:'单选',q:'"对上衣来说谁穿都一样"主要是因为（　）。',o:['是抽象劳动的结果','起着价值的作用','起着使用价值的作用','是社会劳动的结果'],a:'C'},
+      {id:8,type:'单选',q:'正确认识资本主义历史过渡性要（　）。',o:['否定一切改良','全面肯定','借鉴反映人类文明进步的改良','借鉴并发展资本主义经济制度'],a:'C'},
+      {id:9,type:'单选',q:'"鬼""神"意识的错误在于（　）。',o:['夸大意识能动作用','把意识看成物质产物','认为意识是对存在的直观反映','混淆意识演化阶段'],a:'C'},
+      {id:10,type:'单选',q:'"两手抓"方针体现了（　）。',o:['认识和实践统一','矛盾普遍性和特殊性统一','矛盾的同一性和斗争性统一','"两点论"和"重点论"统一'],a:'D'},
+      {id:11,type:'单选',q:'"愚公移山"用炸药汽车的观点错在否认了实践的（　）。',o:['客观物质性','自觉能动性','直接现实性','社会历史性'],a:'D'},
+      {id:12,type:'单选',q:'关于真理正确的是（　）。',o:['有用即真理','真理是权威的女儿','凡真理都是客观真理','真理是人造的工具'],a:'C'},
+      {id:13,type:'单选',q:'社会存在构成要素中最主要的是（　）。',o:['物质生产方式','自然地理环境','人口因素','社会意识'],a:'A'},
+      {id:14,type:'单选',q:'关于人民群众不正确的是（　）。',o:['从量说是人口绝大多数','从质说是推动历史发展的人','任何时期不包括剥削阶级','主体是劳动群众'],a:'C'},
+      {id:15,type:'单选',q:'绝对剩余价值生产是（　）。',o:['工作日不变延长必要劳动时间','工作日不变缩短必要劳动时间','必要劳动时间不变延长工作日','必要劳动时间不变缩短工作日'],a:'C'},
+      {id:16,type:'多选',q:'差别化管理的依据是（　）。',o:['矛盾具有斗争性','矛盾具有普遍性','矛盾具有特殊性','具体问题具体分析'],a:'CD'},
+      {id:17,type:'多选',q:'恩格斯的联系画面包含的辩证法观点有（　）。',o:['联系是客观世界的本性','一切事物处于相互联系中','世界是相互联系的统一整体','联系既普遍又复杂多样'],a:'ABCD'},
+      {id:18,type:'多选',q:'"水能载舟"和"人民是动力"体现的合理见解有（　）。',o:['水能载舟亦能覆舟','天不生仲尼万古如长夜','人民是创造世界历史的动力','大人物心理动进改观历史'],a:'AC'},
+      {id:19,type:'多选',q:'联系的特点有（　）。',o:['客观性','普遍性','多样性','条件性'],a:'ABCD'},
+      {id:20,type:'多选',q:'显微镜下"一沙一世界"表明（　）。',o:['事物具有无限多样属性','本质随认识变化而改变','通过对个别认识达到对整体把握','通过工具深化对客观世界的认识'],a:'ACD'},
+      {id:21,type:'多选',q:'"修昔底德陷阱"的不合理之处在于（　）。',o:['不承认矛盾双方对立统一','否认特殊性寓于普遍性','没看到斗争性寓于同一性','忽视普遍性与特殊性辩证统一'],a:'AC'},
+      {id:22,type:'多选',q:'关于使用价值和价值正确的有（　）。',o:['使用价值是劳动产品共有，价值是商品特有','使用价值是有用性，价值是抽象劳动','对消费者重要的是价值','二者统一于商品又对立排斥'],a:'ABD'},
+      {id:23,type:'论述',q:'请结合经济基础与上层建筑的辩证关系原理，谈谈为什么要警惕毒教材的文化渗透。',ans:'经济基础决定上层建筑，上层建筑对经济基础具有能动的反作用。文化属于上层建筑中的意识形态。毒教材作为文化渗透手段，试图通过歪曲历史、传播错误价值观来影响青少年的思想，从而动摇社会主义意识形态，威胁我国经济基础。因此必须警惕毒教材的文化渗透，加强教材建设，确保文化安全。'},
+      {id:24,type:'材料',q:'[材料1]牛顿：上帝是第一推动力\n[材料2]僧肇：即动而求静则万物常静\n[材料3]恩培多克勒：四根+爱恨\n[材料4]恩格斯：物质是各种实物的总和',ans:'（1）材料1是唯心主义（神创论）；材料2是主观唯心主义（万法唯心）；材料3是朴素唯物主义（四根说）但用"爱恨"解释运动带有唯心色彩。（2）材料4体现了辩证唯物主义的物质观：物质是从各种实物总和中抽象出来的哲学概念，物质的唯一特性是客观实在性。世界的统一性在于物质性。'},
+    ]
+  }
+];
+
+// ===================== STATE =====================
+const STORAGE_KEY = 'mayuan_tiku_v2';
+let state = loadState();
+
+function defaultState() {
+  return {
+    records:{}, dark:false, currentChapter:0, currentQuestionIndex:0,
+    filterType:'all', showingAnswer:false, userAnswers:{},
+    mode:'practice', wrongIds:[]
+  };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      // Ensure all question keys exist
+      DATA.forEach((ch,ci)=>ch.questions.forEach(q=>{
+        const k = `${ci}-${q.id}`;
+        if (!s.records[k]) s.records[k] = {a:false,c:false};
+      }));
+      if (!s.wrongIds) s.wrongIds = [];
+      return s;
+    }
+  } catch(e){}
+  const s = defaultState();
+  DATA.forEach((ch,ci)=>ch.questions.forEach(q=>{ s.records[`${ci}-${q.id}`] = {a:false,c:false}; }));
+  s.wrongIds = [];
+  return s;
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+}
+
+function getKey(ci, qi) { return `${ci}-${qi}`; }
+function getRec(ci, qi) {
+  const k = getKey(ci, qi);
+  if (!state.records[k]) state.records[k] = {a:false,c:false};
+  return state.records[k];
+}
+function getWrongCount() {
+  return state.wrongIds.length;
+}
+function getChapterProgress(ci) {
+  const ch = DATA[ci];
+  const total = ch.questions.length;
+  let done=0, correct=0;
+  ch.questions.forEach(q => {
+    const r = getRec(ci, q.id);
+    if (r.a) done++;
+    if (r.c) correct++;
+  });
+  return {total, done, correct, pct: done?Math.round(correct/done*100):0, dpct: total?Math.round(done/total*100):0};
+}
+function getGlobalStats() {
+  let total=0, done=0, correct=0;
+  DATA.forEach((ch,ci)=>ch.questions.forEach(q=>{
+    total++;
+    const r = getRec(ci, q.id);
+    if (r.a) done++;
+    if (r.c) correct++;
+  }));
+  return {total,done,correct,rate:done?Math.round(correct/done*100):0};
+}
+
+// ===================== DARK MODE =====================
+function toggleDark() {
+  state.dark = !state.dark;
+  document.body.classList.toggle('dark', state.dark);
+  document.getElementById('darkBtn').textContent = state.dark ? '☀️' : '🌙';
+  saveState();
+}
+// Init dark
+if (state.dark) { document.body.classList.add('dark'); document.getElementById('darkBtn').textContent = '☀️'; }
+
+// ===================== PAGES =====================
+let pageStack = ['pageHome'];
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (pageStack[pageStack.length-1] !== id) pageStack.push(id);
+}
+
+function goback() {
+  if (pageStack.length > 1) pageStack.pop();
+  const prev = pageStack[pageStack.length-1];
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(prev).classList.add('active');
+  updateHeader();
+  document.getElementById('navBar').style.display = (prev === 'pageQuiz' ? 'flex' : 'none');
+  if (prev === 'pageHome') renderHome();
+  else if (prev === 'pageChapter') renderChapter(state.currentChapter);
+}
+
+function updateHeader() {
+  const p = pageStack[pageStack.length-1];
+  const back = document.getElementById('backBtn');
+  const title = document.getElementById('pageTitle');
+  const prog = document.getElementById('progressTxt');
+  if (p === 'pageHome') { back.style.display='none'; title.textContent='马原题库'; prog.textContent=''; }
+  else if (p === 'pageChapter') { back.style.display='inline'; title.textContent=DATA[state.currentChapter]?.short||''; prog.textContent=''; }
+  else if (p === 'pageQuiz') { back.style.display='inline'; updateQuizHeader(); }
+  else if (p === 'pageStats') { back.style.display='inline'; title.textContent='📊 学习统计'; prog.textContent=''; }
+  else if (p === 'pageWrong') { back.style.display='inline'; title.textContent='📕 错题本'; prog.textContent=''; }
+}
+
+// ===================== HOME =====================
+function renderHome() {
+  const s = getGlobalStats();
+  document.getElementById('hTotal').textContent = s.total;
+  document.getElementById('hDone').textContent = s.done;
+  document.getElementById('hRate').textContent = s.rate + '%';
+  const wc = getWrongCount();
+  document.getElementById('wrongSub').textContent = `共 ${wc} 题`;
+  document.getElementById('wrongBadge').textContent = wc;
+  document.getElementById('wrongBadge').style.display = wc > 0 ? 'block' : 'none';
+
+  document.getElementById('chapterList').innerHTML = DATA.map((ch, i) => {
+    const p = getChapterProgress(i);
+    return `<div class="ch-card" onclick="openChapter(${i})">
+      <div class="info"><h3>${ch.title}</h3><p>${ch.short} · ${p.total} 题</p></div>
+      <div class="right">
+        <div class="pct">${p.pct}%</div>
+        <div class="bar"><div class="bar-in" style="width:${p.dpct}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+  updateHeader();
+}
+renderHome();
+
+// ===================== CHAPTER =====================
+function openChapter(ci) {
+  state.currentChapter = ci;
+  state.filterType = 'all';
+  showPage('pageChapter');
+  renderChapter(ci);
+}
+
+function renderChapter(ci) {
+  const ch = DATA[ci];
+  const types = [
+    {k:'all',l:'全部',icon:'📝'},{k:'单选',l:'单选',icon:'①'},
+    {k:'多选',l:'多选',icon:'②'},{k:'论述',l:'论述',icon:'📖'},{k:'材料',l:'材料',icon:'📄'}
+  ];
+  document.getElementById('typeGrid').innerHTML = types.map(t => {
+    const cnt = ch.questions.filter(q => t.k==='all'||q.type===t.k).length;
+    return `<div class="type-btn ${state.filterType===t.k?'active':''}" onclick="filterType('${t.k}',${ci})">
+      <div class="icon">${t.icon}</div><div class="label">${t.l}</div><div>${cnt}题</div>
+    </div>`;
+  }).join('');
+  filterQuestions();
+  updateHeader();
+}
+
+function filterQuestions() {
+  const ch = DATA[state.currentChapter];
+  const q = (document.getElementById('searchInput').value||'').trim().toLowerCase();
+  const filtered = ch.questions.filter(x =>
+    (state.filterType==='all'||x.type===state.filterType) &&
+    (!q||x.q.toLowerCase().includes(q))
+  );
+  const colors = {'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
+  document.getElementById('questionList').innerHTML = filtered.length
+    ? filtered.map((x,i)=>{
+        const gi = ch.questions.indexOf(x);
+        const r = getRec(state.currentChapter, x.id);
+        const dot = r.a ? (r.c?'ok':'no') : 'none';
+        const isLong = x.type === '论述' || x.type === '材料';
+        return `<div class="q-item" style="${isLong?'flex-direction:column;align-items:stretch;gap:4px':''}" onclick="startQ(${state.currentChapter},${gi})">
+          <div style="display:flex;align-items:center;gap:8px;${isLong?'width:100%':''}">
+            <span class="dot ${dot}"></span>
+            <span class="tag" style="color:${colors[x.type]||'#888'}">${x.type}</span>
+            <span style="flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.q.replace(/\n.*/,'').slice(0,50)}${x.q.replace(/\n.*/,'').length>50?'...':''}</span>
+            ${r.a ? (r.c?'✅':'❌') : ''}
+          </div>
+          ${isLong?`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-left:26px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${x.q.replace(/\n/g,'<br>')}</div>`:''}
+        </div>`;
+      }).join('')
+    : '<div class="empty"><div class="icon">🔍</div><p>未找到匹配题目</p></div>';
+  updateHeader();
+}
+
+function setMode(m) {
+  state.mode = m;
+  document.querySelectorAll('#modeSwitch div').forEach(el => el.classList.toggle('active', el.dataset.mode===m));
+}
+
+// ===================== QUIZ =====================
+function startQ(ci, qi) {
+  state.currentChapter = ci;
+  state.currentQuestionIndex = qi;
+  state.showingAnswer = false;
+  state.userAnswers = {};
+  document.getElementById('sheetCard').style.display = 'none';
+  showPage('pageQuiz');
+  document.getElementById('navBar').style.display = 'flex';
+  renderQ();
+}
+
+function renderQ() {
+  const ch = DATA[state.currentChapter];
+  const q = ch.questions[state.currentQuestionIndex];
+  if (!q) return;
+  const c = state.currentChapter;
+  const total = ch.questions.length;
+  const cur = state.currentQuestionIndex;
+  const colors = {'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
+  const container = document.getElementById('quizContent');
+  const sheetSel = document.getElementById('sheetCard');
+
+  // Render answer sheet
+  renderSheet();
+
+  if (q.type === '单选' || q.type === '多选') {
+    const isMulti = q.type === '多选';
+    const key = getKey(c, q.id);
+    const sel = state.userAnswers[key] || [];
+    const dis = state.showingAnswer;
+    const letters = 'ABCDEFGH';
+
+    container.innerHTML = `<div class="quiz-card">
+      <div class="q-hd">
+        <span><span class="q-badge" style="background:${colors[q.type]}15;color:${colors[q.type]}">${q.type}</span> 第 ${cur+1}/${total} 题</span>
+        <span>${c+1}·${ch.short}</span>
+      </div>
+      <div class="q-body"><span class="num">${cur+1}</span>${q.q}</div>
+      ${isMulti?'<div class="multi-hint">⚡ 多选题（选择所有正确选项）</div>':''}
+      <div class="opts">${q.o.map((opt,oi)=>{
+        const l = letters[oi];
+        let cls = 'opt';
+        if (sel.includes(l)) cls += ' sel';
+        if (state.showingAnswer) {
+          cls += ' dis';
+          if (q.a.includes(l)) cls += ' cor';
+          else if (sel.includes(l) && !q.a.includes(l)) cls += ' wro';
+        }
+        return `<div class="${cls}" onclick="${dis?'':(isMulti?'togM':'selS')}('${l}')"><span class="l">${l}</span><span>${opt.replace(/^[A-Z][.、]\s*/,'')}</span></div>`;
+      }).join('')}</div>
+      ${state.showingAnswer?`<div class="ans-box"><div class="title">✅ 正确答案：${isMulti?q.a.split('').join('、'):q.a}</div></div>`:''}
+    </div>`;
+  } else {
+    container.innerHTML = `<div class="essay-card">
+      <div class="q-hd">
+        <span><span class="q-badge" style="background:${colors[q.type]}15;color:${colors[q.type]}">${q.type}</span> 第 ${cur+1}/${total} 题</span>
+      </div>
+      <div class="q-body pre-line"><span class="num">${cur+1}</span>${q.q}</div>
+      <div class="essay-toggle" onclick="togEssay()">${state.showingAnswer?'📕 收起答案':'📖 点击查看参考答案'}</div>
+      <div class="essay-ans ${state.showingAnswer?'show':''}">${q.ans||'（参考答案）'}</div>
+    </div>`;
+  }
+  updateQuizHeader();
+  updateNavBtn();
+  saveState();
+}
+
+function renderSheet() {
+  const ch = DATA[state.currentChapter];
+  const cur = state.currentQuestionIndex;
+  document.getElementById('sheetGrid').innerHTML = ch.questions.map((q,i)=>{
+    const r = getRec(state.currentChapter, q.id);
+    let cls = 'sheet-cell';
+    if (i === cur) cls += ' cur';
+    else if (r.c) cls += ' ok';
+    else if (r.a && !r.c) cls += ' no';
+    else cls += ' pending';
+    return `<div class="${cls}" onclick="jumpTo(${i})">${i+1}</div>`;
+  }).join('');
+}
+
+function toggleSheet() {
+  const el = document.getElementById('sheetCard');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function jumpTo(i) {
+  state.currentQuestionIndex = i;
+  state.showingAnswer = false;
+  state.userAnswers = {};
+  document.getElementById('sheetCard').style.display = 'none';
+  renderQ();
+}
+
+function selS(l) {
+  if (state.showingAnswer) return;
+  const c = state.currentChapter;
+  const q = DATA[c].questions[state.currentQuestionIndex];
+  const key = getKey(c, q.id);
+  state.userAnswers[key] = [l];
+  // 自动判题
+  const corr = l === q.a;
+  state.showingAnswer = true;
+  const rec = getRec(c, q.id);
+  rec.a = true;
+  rec.c = corr;
+  state.records[key] = rec;
+  const wid = getKey(c, q.id);
+  if (corr) { state.wrongIds = state.wrongIds.filter(x => x !== wid); }
+  else { if (!state.wrongIds.includes(wid)) state.wrongIds.push(wid); }
+  renderQ();
+  saveState();
+  if (corr) showToast('✅ 回答正确！');
+  else showToast('❌ 回答错误，已加入错题本');
+  updateNavBtn();
+}
+
+function togM(l) {
+  if (state.showingAnswer) return;
+  const c = state.currentChapter;
+  const q = DATA[c].questions[state.currentQuestionIndex];
+  const key = getKey(c, q.id);
+  if (!state.userAnswers[key]) state.userAnswers[key] = [];
+  const arr = state.userAnswers[key];
+  const idx = arr.indexOf(l);
+  if (idx>=0) arr.splice(idx,1); else arr.push(l);
+  // 选完答案个数后自动判题
+  if (arr.length >= q.a.length) {
+    const sorted = [...arr].sort().join('');
+    const answer = q.a.split('').sort().join('');
+    const corr = sorted === answer;
+    state.showingAnswer = true;
+    const rec = getRec(c, q.id);
+    rec.a = true; rec.c = corr;
+    state.records[key] = rec;
+    const wid = getKey(c, q.id);
+    if (corr) { state.wrongIds = state.wrongIds.filter(x => x !== wid); }
+    else { if (!state.wrongIds.includes(wid)) state.wrongIds.push(wid); }
+    renderQ(); saveState();
+    if (corr) showToast('✅ 多选题全部正确！');
+    else showToast('❌ 多选题回答错误');
+    updateNavBtn();
+  } else {
+    renderQ();
+  }
+}
+
+function togEssay() {
+  state.showingAnswer = !state.showingAnswer;
+  renderQ();
+}
+
+function actionBtn() {
+  const c = state.currentChapter;
+  const q = DATA[c].questions[state.currentQuestionIndex];
+  if (q.type === '论述' || q.type === '材料') {
+    state.showingAnswer = !state.showingAnswer;
+    renderQ();
+    return;
+  }
+  // answer checking
+  if (state.showingAnswer) {
+    // Already showing answer - just a display toggle effect
+    return;
+  }
+  const key = getKey(c, q.id);
+  const sel = state.userAnswers[key];
+  if (!sel || !sel.length) { showToast('请先选择一个答案'); return; }
+  const isMulti = q.type === '多选';
+  const corr = isMulti
+    ? sel.sort().join('') === q.a.split('').sort().join('')
+    : sel[0] === q.a;
+  state.showingAnswer = true;
+  const rec = getRec(c, q.id);
+  rec.a = true;
+  rec.c = corr;
+  state.records[key] = rec;
+  // Update wrong book
+  const wid = getKey(c, q.id);
+  if (corr) { state.wrongIds = state.wrongIds.filter(x => x !== wid); }
+  else { if (!state.wrongIds.includes(wid)) state.wrongIds.push(wid); }
+  renderQ();
+  saveState();
+  if (corr) showToast('✅ 回答正确！');
+  else showToast('❌ 回答错误，已加入错题本');
+  updateNavBtn();
+}
+
+function nextQ() {
+  const ch = DATA[state.currentChapter];
+  if (state.currentQuestionIndex < ch.questions.length - 1) {
+    state.currentQuestionIndex++;
+    state.showingAnswer = false;
+    state.userAnswers = {};
+    renderQ();
+  }
+}
+function prevQ() {
+  if (state.currentQuestionIndex > 0) {
+    state.currentQuestionIndex--;
+    state.showingAnswer = false;
+    state.userAnswers = {};
+    renderQ();
+  }
+}
+
+function updateQuizHeader() {
+  const ch = DATA[state.currentChapter];
+  const total = ch.questions.length;
+  const cur = state.currentQuestionIndex + 1;
+  document.getElementById('pageTitle').textContent = `${ch.short}`;
+  document.getElementById('progressTxt').textContent = `${cur}/${total}`;
+}
+
+function updateNavBtn() {
+  const ch = DATA[state.currentChapter];
+  const q = ch.questions[state.currentQuestionIndex];
+  document.getElementById('prevQ').disabled = state.currentQuestionIndex === 0;
+  document.getElementById('nextQ').disabled = state.currentQuestionIndex >= ch.questions.length - 1;
+  const btn = document.getElementById('actionBtn');
+  if (q.type === '论述' || q.type === '材料') {
+    btn.textContent = state.showingAnswer ? '📕 收起答案' : '📖 查看答案';
+  } else {
+    btn.textContent = state.showingAnswer ? '✓ 已作答' : '✓ 查看答案';
+  }
+}
+
+// ===================== RANDOM =====================
+function goRandom() {
+  // Pick a random unanswered or random question
+  const all = [];
+  DATA.forEach((ch,ci)=>ch.questions.forEach((q,qi)=>{ all.push({ci,qi}); }));
+  const picked = all[Math.floor(Math.random() * all.length)];
+  if (picked) startQ(picked.ci, picked.qi);
+}
+
+// ===================== WRONG BOOK =====================
+function goWrongBook() {
+  showPage('pageWrong');
+  updateHeader();
+  document.getElementById('pageTitle').textContent = '📕 错题本';
+  renderWrong();
+}
+
+function renderWrong() {
+  const container = document.getElementById('wrongContent');
+  const wrongs = state.wrongIds;
+  if (!wrongs.length) {
+    container.innerHTML = '<div class="empty"><div class="icon">🎉</div><p>暂无错题，继续保持！</p></div>';
+    return;
+  }
+  const items = wrongs.map(wid => {
+    const [ci, qi] = wid.split('-').map(Number);
+    const ch = DATA[ci];
+    const q = ch?.questions.find(x => x.id === qi);
+    if (!q) return null;
+    const colors = {'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
+    const isLong = q.type === '论述' || q.type === '材料';
+    return `<div class="q-item" style="${isLong?'flex-direction:column;align-items:stretch;gap:4px':''}" onclick="startQ(${ci},${ch.questions.indexOf(q)})">
+      <div style="display:flex;align-items:center;gap:8px;${isLong?'width:100%':''}">
+        <span class="dot no"></span>
+        <span class="tag" style="color:${colors[q.type]||'#888'}">${q.type}</span>
+        <span style="flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.q.replace(/\n.*/,'').slice(0,50)}${q.q.replace(/\n.*/,'').length>50?'...':''}</span>
+        <span style="font-size:12px;color:var(--text2);flex-shrink:0">${ch.short}</span>
+      </div>
+      ${isLong?`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-left:26px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${q.q.replace(/\n/g,'<br>')}</div>`:''}
+    </div>`;
+  }).filter(Boolean).join('');
+  container.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <span style="font-size:14px;color:var(--text2)">共 ${wrongs.length} 道错题</span>
+    <button class="nav-btn danger" onclick="clearWrongs()" style="padding:6px 14px;font-size:13px">🗑 清空错题本</button>
+  </div>${items}`;
+}
+
+function clearWrongs() {
+  if (confirm('确定清空错题本吗？')) {
+    state.wrongIds = [];
+    saveState();
+    renderWrong();
+    renderHome();
+    showToast('已清空错题本');
+  }
+}
+
+// ===================== STATS =====================
+function goStats() {
+  showPage('pageStats');
+  updateHeader();
+  document.getElementById('pageTitle').textContent = '📊 学习统计';
+  const container = document.getElementById('statsContent');
+  let html = '<div class="stat-section"><h3>📈 各章正确率</h3>';
+  DATA.forEach((ch,ci)=>{
+    const p = getChapterProgress(ci);
+    const color = ch.color || '#4F46E5';
+    html += `<div class="stat-bar-row">
+      <span class="lb">${ch.short}</span>
+      <div class="bar"><div class="bar-fill" style="width:${p.pct}%;background:${color}"></div></div>
+      <span class="val">${p.pct}%</span>
+    </div><div style="font-size:12px;color:var(--text2);margin:-4px 0 8px 90px">${p.done}/${p.total} 题</div>`;
+  });
+  html += '</div>';
+
+  // Type stats
+  const typeStats = { '单选':{total:0,done:0,correct:0}, '多选':{total:0,done:0,correct:0}, '论述':{total:0,done:0,correct:0}, '材料':{total:0,done:0,correct:0} };
+  DATA.forEach((ch,ci)=>ch.questions.forEach(q=>{
+    if (typeStats[q.type]) {
+      typeStats[q.type].total++;
+      const r = getRec(ci, q.id);
+      if (r.a) { typeStats[q.type].done++; if (r.c) typeStats[q.type].correct++; }
+    }
+  }));
+  html += '<div class="stat-section"><h3>📋 题型正确率</h3>';
+  const typeColors = {'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
+  Object.entries(typeStats).forEach(([t,s])=>{
+    const r = s.done ? Math.round(s.correct/s.done*100) : 0;
+    html += `<div class="stat-bar-row">
+      <span class="lb">${t}</span>
+      <div class="bar"><div class="bar-fill" style="width:${r}%;background:${typeColors[t]||'#888'}"></div></div>
+      <span class="val">${r}%</span>
+    </div><div style="font-size:12px;color:var(--text2);margin:-4px 0 8px 90px">${s.done}/${s.total} 题</div>`;
+  });
+  html += '</div>';
+
+  const g = getGlobalStats();
+  html += `<div class="review-grid">
+    <div class="review-stat"><div class="n" style="color:var(--primary)">${g.total}</div><div class="l">总题数</div></div>
+    <div class="review-stat"><div class="n" style="color:var(--success)">${g.done}</div><div class="l">已答题</div></div>
+    <div class="review-stat"><div class="n" style="color:var(--warning)">${getWrongCount()}</div><div class="l">错题数</div></div>
+    <div class="review-stat"><div class="n" style="color:var(--primary)">${g.rate}%</div><div class="l">总正确率</div></div>
+  </div>`;
+
+  // Reset all
+  html += `<div style="text-align:center;margin-top:16px"><button class="nav-btn danger" onclick="resetAll()" style="padding:10px 24px">🔄 重置所有学习进度</button></div>`;
+
+  container.innerHTML = html;
+}
+
+function resetAll() {
+  if (confirm('确定重置所有学习进度吗？此操作不可撤销。')) {
+    state.records = {};
+    state.wrongIds = [];
+    DATA.forEach((ch,ci)=>ch.questions.forEach(q=>{ state.records[`${ci}-${q.id}`] = {a:false,c:false}; }));
+    saveState();
+    renderHome();
+    goStats();
+    showToast('已重置所有进度');
+  }
+}
+
+// ===================== EXAM =====================
+function goExam() {
+  // Pick 20 random single-choice + 5 multi-choice for exam simulation
+  const allSingle = [];
+  const allMulti = [];
+  DATA.forEach((ch,ci)=>ch.questions.forEach((q,qi)=>{
+    if (q.type === '单选') allSingle.push({ci,qi,ch:ch.short});
+    else if (q.type === '多选') allMulti.push({ci,qi,ch:ch.short});
+  }));
+  // Shuffle and pick
+  const pick = (arr,n) => {
+    const copy = [...arr];
+    for (let i=copy.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [copy[i],copy[j]]=[copy[j],copy[i]]; }
+    return copy.slice(0,n);
+  };
+  const singles = pick(allSingle, 20);
+  const multis = pick(allMulti, 5);
+  const examQs = [...singles, ...multis];
+  if (!examQs.length) { showToast('没有足够的题目'); return; }
+  // Store exam state
+  state.examQuestions = examQs;
+  state.examIndex = 0;
+  state.examAnswers = {};
+  state.currentChapter = examQs[0].ci;
+  state.currentQuestionIndex = examQs[0].qi;
+  state.showingAnswer = false;
+  state.userAnswers = {};
+  document.getElementById('sheetCard').style.display = 'none';
+  showPage('pageQuiz');
+  document.getElementById('navBar').style.display = 'flex';
+  renderExamQ();
+}
+
+function renderExamQ() {
+  const eq = state.examQuestions;
+  const idx = state.examIndex;
+  if (!eq || idx >= eq.length) { renderExamResult(); return; }
+  const {ci, qi} = eq[idx];
+  const ch = DATA[ci];
+  const q = ch.questions[qi];
+  if (!q) return;
+  const total = eq.length;
+  const cur = idx;
+  const colors = {'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
+  const isMulti = q.type === '多选';
+  const key = `exam-${ci}-${q.id}`;
+  const sel = state.examAnswers[key] || [];
+  const letters = 'ABCDEFGH';
+  const container = document.getElementById('quizContent');
+
+  container.innerHTML = `<div class="quiz-card">
+    <div class="q-hd">
+      <span><span class="q-badge" style="background:${colors[q.type]}15;color:${colors[q.type]}">${q.type}</span> 模拟考试 · 第 ${cur+1}/${total} 题</span>
+      <span>${ch.short}</span>
+    </div>
+    <div class="q-body"><span class="num">${cur+1}</span>${q.q}</div>
+    ${isMulti?'<div class="multi-hint">⚡ 多选题</div>':''}
+    <div class="opts">${q.o.map((opt,oi)=>{
+      const l = letters[oi];
+      let cls = 'opt';
+      if (sel.includes(l)) cls += ' sel';
+      return `<div class="${cls}" onclick="${isMulti?'examTogM':'examSelS'}('${l}')"><span class="l">${l}</span><span>${opt.replace(/^[A-Z][.、]\s*/,'')}</span></div>`;
+    }).join('')}</div>
+  </div>`;
+  document.getElementById('pageTitle').textContent = '📝 模拟考试';
+  document.getElementById('progressTxt').textContent = `${cur+1}/${total}`;
+  document.getElementById('prevQ').disabled = idx === 0;
+  document.getElementById('nextQ').disabled = false;
+  document.getElementById('actionBtn').textContent = idx < total-1 ? '下一题' : '📊 交卷';
+  document.getElementById('sheetCard').style.display = 'none';
+}
+
+function examSelS(l) {
+  const eq = state.examQuestions;
+  const {ci, qi} = eq[state.examIndex];
+  const q = DATA[ci].questions[qi];
+  state.examAnswers[`exam-${ci}-${q.id}`] = [l];
+  renderExamQ();
+}
+function examTogM(l) {
+  const eq = state.examQuestions;
+  const {ci, qi} = eq[state.examIndex];
+  const q = DATA[ci].questions[qi];
+  const key = `exam-${ci}-${q.id}`;
+  if (!state.examAnswers[key]) state.examAnswers[key] = [];
+  const arr = state.examAnswers[key];
+  const idx = arr.indexOf(l);
+  if (idx>=0) arr.splice(idx,1); else arr.push(l);
+  renderExamQ();
+}
+
+function renderExamResult() {
+  const eq = state.examQuestions;
+  let correct = 0, total = eq.length;
+  eq.forEach(({ci,qi})=>{
+    const q = DATA[ci].questions[qi];
+    const key = `exam-${ci}-${q.id}`;
+    const sel = state.examAnswers[key] || [];
+    const isMulti = q.type === '多选';
+    const corr = isMulti
+      ? sel.sort().join('') === q.a.split('').sort().join('')
+      : sel[0] === q.a;
+    if (corr) correct++;
+    // Save to records
+    const rec = getRec(ci, q.id);
+    rec.a = true;
+    rec.c = corr;
+    state.records[getKey(ci, q.id)] = rec;
+    const wid = getKey(ci, q.id);
+    if (corr) { state.wrongIds = state.wrongIds.filter(x => x !== wid); }
+    else { if (!state.wrongIds.includes(wid)) state.wrongIds.push(wid); }
+  });
+  saveState();
+  const pct = Math.round(correct/total*100);
+  const emoji = pct>=80?'🌟':pct>=60?'👍':'💪';
+  const container = document.getElementById('quizContent');
+  container.innerHTML = `<div class="quiz-card" style="text-align:center;padding:40px 20px">
+    <div style="font-size:64px;margin-bottom:12px">${emoji}</div>
+    <div style="font-size:48px;font-weight:800;color:var(--primary)">${pct}%</div>
+    <div style="font-size:16px;color:var(--text2);margin-top:8px">正确率</div>
+    <div style="margin-top:20px;font-size:15px;line-height:1.8">✅ 答对 <strong style="color:var(--success)">${correct}</strong> 题<br>❌ 答错 <strong style="color:var(--danger)">${total-correct}</strong> 题<br>📝 共 <strong>${total}</strong> 题</div>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:center">
+      <button class="nav-btn primary" onclick="goHome()" style="padding:12px 28px">返回首页</button>
+      <button class="nav-btn ghost" onclick="goExam()" style="padding:12px 28px">再来一次</button>
+    </div>
+  </div>`;
+  document.getElementById('navBar').style.display = 'none';
+  document.getElementById('pageTitle').textContent = '📊 考试结果';
+  document.getElementById('progressTxt').textContent = '';
+}
+
+function goHome() { showPage('pageHome'); renderHome(); document.getElementById('navBar').style.display='none'; }
+
+// Override actionBtn for exam mode
+const origAction = actionBtn;
+actionBtn = function() {
+  if (state.examQuestions) {
+    const eq = state.examQuestions;
+    if (state.examIndex < eq.length - 1) {
+      state.examIndex++;
+      renderExamQ();
+    } else {
+      renderExamResult();
+    }
+    return;
+  }
+  origAction.call ? origAction() : origAction();
+};
+
+// ===================== UTILS =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+</script>
+</body>
+</html>
