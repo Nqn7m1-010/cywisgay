@@ -782,10 +782,15 @@ function resetAll(){if(confirm('确定重置所有学习进度吗？此操作不
 // ===================== EXAM =====================
 function goExam() {
   state.randomMode=false; state.examQuestions=null;
-  const allSingle=[],allMulti=[];
-  DATA.forEach((ch,ci)=>ch.questions.forEach((q,qi)=>{if(q.type==='单选')allSingle.push({ci,qi,ch:ch.short});else if(q.type==='多选')allMulti.push({ci,qi,ch:ch.short});}));
+  const allSingle=[],allMulti=[],allEssay=[],allMaterial=[];
+  DATA.forEach((ch,ci)=>ch.questions.forEach((q,qi)=>{
+    if(q.type==='单选') allSingle.push({ci,qi,ch:ch.short});
+    else if(q.type==='多选') allMulti.push({ci,qi,ch:ch.short});
+    else if(q.type==='论述') allEssay.push({ci,qi,ch:ch.short});
+    else if(q.type==='材料') allMaterial.push({ci,qi,ch:ch.short});
+  }));
   const pick=(arr,n)=>{const copy=[...arr];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy.slice(0,n);};
-  const examQs=[...pick(allSingle,20),...pick(allMulti,5)];
+  const examQs=[...pick(allSingle,10),...pick(allMulti,10),...pick(allEssay,4),...pick(allMaterial,2)];
   if(!examQs.length){showToast('没有足够的题目');return;}
   state.examQuestions=examQs; state.examIndex=0; state.examAnswers={}; state.showingAnswer=false;
   document.getElementById('sheetCard').style.display='none';
@@ -795,19 +800,34 @@ function renderExamQ() {
   const eq=state.examQuestions; const idx=state.examIndex;
   if(!eq||idx>=eq.length){renderExamResult();return;}
   const {ci,qi}=eq[idx]; const ch=DATA[ci]; const q=ch.questions[qi];
-  if(!q) return; const isMulti=q.type==='多选'; const key=`exam-${ci}-${q.id}`;
-  const sel=state.examAnswers[key]||[]; const letters='ABCDEFGH';
+  if(!q) return; const isMulti=q.type==='多选'; const isEssay=q.type==='论述'||q.type==='材料';
+  const key=`exam-${ci}-${q.id}`; const sel=state.examAnswers[key]||[]; const letters='ABCDEFGH';
   const colors={'单选':'#4F46E5','多选':'#D97706','论述':'#059669','材料':'#DC2626'};
   const container=document.getElementById('quizContent');
-  container.innerHTML=`<div class="quiz-card">
-    <div class="q-hd"><span><span class="q-badge" style="background:${colors[q.type]}15;color:${colors[q.type]}">${q.type}</span> 模拟考试 · 第${idx+1}/${eq.length}题</span><span>${ch.short}</span></div>
-    <div class="q-body"><span class="num">${idx+1}</span>${q.q}</div>
-    ${isMulti?'<div class="multi-hint">⚡ 多选题</div>':''}
-    <div class="opts">${q.o.map((opt,oi)=>{const l=letters[oi];let cls='opt';if(sel.includes(l))cls+=' sel';return `<div class="${cls}" onclick="examSel('${l}')"><span class="l">${l}</span><span>${opt.replace(/^[A-Z][.、]\s*/,'')}</span></div>`;}).join('')}</div>
-  </div>`;
+  if(isEssay){
+    container.innerHTML=`<div class="essay-card">
+      <div class="q-hd"><span><span class="q-badge" style="background:${colors[q.type]}15;color:${colors[q.type]}">${q.type}</span> 模拟考试 · 第${idx+1}/${eq.length}题</span><span>${ch.short}</span></div>
+      <div class="q-body pre-line"><span class="num">${idx+1}</span>${q.q}</div>
+      <div class="essay-toggle" onclick="examToggleEssay(${idx})">${sel[0]==='shown'?'📕 收起答案':'📖 点击查看参考答案'}</div>
+      <div class="essay-ans ${sel[0]==='shown'?'show':''}">${q.ans||''}</div>
+    </div>`;
+  } else {
+    container.innerHTML=`<div class="quiz-card">
+      <div class="q-hd"><span><span class="q-badge" style="background:${colors[q.type]}15;color:${colors[q.type]}">${q.type}</span> 模拟考试 · 第${idx+1}/${eq.length}题</span><span>${ch.short}</span></div>
+      <div class="q-body"><span class="num">${idx+1}</span>${q.q}</div>
+      ${isMulti?'<div class="multi-hint">⚡ 多选题</div>':''}
+      <div class="opts">${q.o.map((opt,oi)=>{const l=letters[oi];let cls='opt';if(sel.includes(l))cls+=' sel';return `<div class="${cls}" onclick="examSel('${l}')"><span class="l">${l}</span><span>${opt.replace(/^[A-Z][.、]\s*/,'')}</span></div>`;}).join('')}</div>
+    </div>`;
+  }
   document.getElementById('prevQ').disabled=idx===0; document.getElementById('nextQ').disabled=false;
   document.getElementById('actionBtn').textContent=idx<eq.length-1?'下一题':'📊 交卷';
   updateHeader(); document.getElementById('sheetCard').style.display='none';
+}
+function examToggleEssay(idx){
+  const key=`exam-${state.examQuestions[idx].ci}-${state.examQuestions[idx].qi}`;
+  if(!state.examAnswers[key]) state.examAnswers[key]=[];
+  state.examAnswers[key]=state.examAnswers[key][0]==='shown'?[]:['shown'];
+  renderExamQ();
 }
 function examSel(l) {
   const eq=state.examQuestions; const {ci,qi}=eq[state.examIndex]; const q=DATA[ci].questions[qi];
@@ -829,11 +849,19 @@ function examSel(l) {
   }
 }
 function renderExamResult() {
-  const eq=state.examQuestions; let correct=0; const total=eq.length;
-  eq.forEach(({ci,qi})=>{const q=DATA[ci].questions[qi];const key=`exam-${ci}-${q.id}`;const sel=state.examAnswers[key]||[];const isMulti=q.type==='多选';const corr=isMulti?sel.sort().join('')===q.a.split('').sort().join(''):sel[0]===q.a;if(corr)correct++;const rec=getRec(ci,q.id);rec.a=true;rec.c=corr;state.records[getKey(ci,q.id)]=rec;const wid=getKey(ci,q.id);if(corr)state.wrongIds=state.wrongIds.filter(x=>x!==wid);else if(!state.wrongIds.includes(wid))state.wrongIds.push(wid);});
-  saveState(); const pct=Math.round(correct/total*100); const emoji=pct>=80?'🌟':pct>=60?'👍':'💪';
+  const eq=state.examQuestions; let correct=0; let scored=0; const total=eq.length;
+  eq.forEach(({ci,qi})=>{const q=DATA[ci].questions[qi];const key=`exam-${ci}-${q.id}`;const sel=state.examAnswers[key]||[];
+    if(q.type==='论述'||q.type==='材料') return; // 论述/材料不评分
+    scored++;
+    const isMulti=q.type==='多选';const corr=isMulti?sel.sort().join('')===q.a.split('').sort().join(''):sel[0]===q.a;
+    if(corr)correct++;
+    const rec=getRec(ci,q.id);rec.a=true;rec.c=corr;state.records[getKey(ci,q.id)]=rec;
+    const wid=getKey(ci,q.id);if(corr)state.wrongIds=state.wrongIds.filter(x=>x!==wid);else if(!state.wrongIds.includes(wid))state.wrongIds.push(wid);
+  });
+  saveState(); const pct=scored?Math.round(correct/scored*100):0; const emoji=pct>=80?'🌟':pct>=60?'👍':'💪';
+  const essayCount=total-scored;
   const container=document.getElementById('quizContent');
-  container.innerHTML=`<div class="quiz-card" style="text-align:center;padding:40px 20px"><div style="font-size:64px;margin-bottom:12px">${emoji}</div><div style="font-size:48px;font-weight:800;color:var(--primary)">${pct}%</div><div style="font-size:16px;color:var(--text2);margin-top:8px">正确率</div><div style="margin-top:20px;font-size:15px;line-height:1.8">✅ 答对 <strong style="color:var(--success)">${correct}</strong> 题<br>❌ 答错 <strong style="color:var(--danger)">${total-correct}</strong> 题<br>📝 共 <strong>${total}</strong> 题</div><div style="display:flex;gap:12px;margin-top:24px;justify-content:center"><button class="nav-btn primary" onclick="exitToHome()" style="padding:12px 28px">返回首页</button><button class="nav-btn ghost" onclick="goExam()" style="padding:12px 28px">再来一次</button></div></div>`;
+  container.innerHTML=`<div class="quiz-card" style="text-align:center;padding:40px 20px"><div style="font-size:64px;margin-bottom:12px">${emoji}</div><div style="font-size:48px;font-weight:800;color:var(--primary)">${pct}%</div><div style="font-size:16px;color:var(--text2);margin-top:8px">选择题正确率</div><div style="margin-top:20px;font-size:15px;line-height:1.8">✅ 答对 <strong style="color:var(--success)">${correct}</strong> 题<br>❌ 答错 <strong style="color:var(--danger)">${scored-correct}</strong> 题<br>📝 选择题共 <strong>${scored}</strong> 题${essayCount?`<br>📖 另有 ${essayCount} 道论述/材料题（不计分）`:''}</div><div style="display:flex;gap:12px;margin-top:24px;justify-content:center"><button class="nav-btn primary" onclick="exitToHome()" style="padding:12px 28px">返回首页</button><button class="nav-btn ghost" onclick="goExam()" style="padding:12px 28px">再来一次</button></div></div>`;
   document.getElementById('navBar').style.display='none'; document.getElementById('pageTitle').textContent='📊 考试结果'; document.getElementById('progressTxt').textContent='';
 }
 function exitToHome(){state.examQuestions=null;state.randomMode=false;showPage('pageHome');renderHome();document.getElementById('navBar').style.display='none';}
